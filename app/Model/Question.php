@@ -17,7 +17,6 @@ class Question extends Model
         return asset("api/question/$this->slug");
     }
 
-    // protected  $fillable = ['title', 'slug', 'body', 'category_id', 'user_id'];
     protected $guarded = [];
 
     public function user()

@@ -3,19 +3,20 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Model\Category;
-use App\Http\Resources\CategoryResource;
+use App\Model\Reply;
+use App\Model\Question;
+use App\Http\Resources\ReplyResource;
 
-class CategoryController extends Controller
+class ReplyController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Question $question)
     {
-        return CategoryResource::collection(Category::latest()->get());
+        return ReplyResource::collection($question->replies);
     }
 
     /**
@@ -24,13 +25,10 @@ class CategoryController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Question $question, Request $request)
     {
-        $cat = new Category;
-        $cat->name = $request->name;
-        $cat->slug = str_slug($request->name);
-        $cat->save();
-        return response('Created', 200);
+        $reply = $question->replies()->create($request->all());
+        return response(['reply' => new ReplyResource($reply)], 200);
     }
 
     /**
@@ -39,9 +37,9 @@ class CategoryController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Category $category)
+    public function show(Question $question, Reply $reply)
     {
-        return new CategoryResource($category);
+        return new ReplyResource($reply);
     }
 
     /**
@@ -51,13 +49,9 @@ class CategoryController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Category $category)
+    public function update(Question $question, Request $request, $id)
     {
-        $name = $request->name;
-        $category->update([
-            'name' => $name,
-            'slug' => str_slug($name)
-        ]);
+        $reply->update($request->all());
         return response('Updated', 200);
     }
 
@@ -67,9 +61,9 @@ class CategoryController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Category $category)
+    public function destroy(Question $question, Reply $reply)
     {
-        $category->delete();
+        $reply->delete();
         return response('Deleted', 200);
     }
 }
